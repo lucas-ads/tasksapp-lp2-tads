@@ -8,11 +8,12 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Scanner;
 
+import br.edu.ifms.tasksapp.dao.ConnectionFactory;
 import br.edu.ifms.tasksapp.models.Tarefa;
 
 public class Programa { 
 	
-public static void main(String[] args) throws SQLException {
+	public static void main(String[] args) throws SQLException {
 		
 		int opcao;
 		Scanner leitorTerminal = new Scanner(System.in);
@@ -57,11 +58,7 @@ public static void main(String[] args) throws SQLException {
 		System.out.println("Informe a prioridade da tarefa: ");
 		int prioridade = leitor.nextInt();
 		
-		String dbURL = "jdbc:mysql://localhost:3306/tasksdb?useTimezone=True&serverTimezone=UTC";
-		String username = "root";
-		String password = "senha";
-		
-		Connection conn = DriverManager.getConnection(dbURL, username, password);
+		Connection conn = ConnectionFactory.getConnection();
 		
 		Tarefa tarefa;
 		try {
@@ -100,11 +97,7 @@ public static void main(String[] args) throws SQLException {
 		int id = leitor.nextInt();
 		leitor.nextLine(); //Limpar buffer do console 
 		
-		String dbURL = "jdbc:mysql://localhost:3306/tasksdb?useTimezone=True&serverTimezone=UTC";
-		String username = "root";
-		String password = "senha";
-		
-		Connection conn = DriverManager.getConnection(dbURL, username, password);
+		Connection conn = ConnectionFactory.getConnection();
 		
 		if(conn!=null) {
 		
@@ -159,11 +152,7 @@ public static void main(String[] args) throws SQLException {
 		int id = leitor.nextInt();
 		leitor.nextLine(); //Limpar buffer do console 
 		
-		String dbURL = "jdbc:mysql://localhost:3306/tasksdb?useTimezone=True&serverTimezone=UTC";
-		String username = "root";
-		String password = "senha";
-		
-		Connection conn = DriverManager.getConnection(dbURL, username, password);
+		Connection conn = ConnectionFactory.getConnection();
 		
 		if(conn!=null) {
 			String sql = "delete from tarefas where id = ?";
@@ -187,11 +176,7 @@ public static void main(String[] args) throws SQLException {
 	public static void listarTarefas() throws SQLException {
 		System.out.println("----> Listar tarefas\n");
 		
-		String dbURL = "jdbc:mysql://localhost:3306/tasksdb?useTimezone=True&serverTimezone=UTC";
-		String username = "root";
-		String password = "senha";
-		
-		Connection conn = DriverManager.getConnection(dbURL, username, password);
+		Connection conn = ConnectionFactory.getConnection();
 		
 		if(conn!=null) {
 			String sql = "select * from tarefas";
