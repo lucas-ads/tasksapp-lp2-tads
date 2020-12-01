@@ -8,6 +8,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Scanner;
 
+import br.edu.ifms.tasksapp.models.Tarefa;
+
 public class Programa { 
 	
 public static void main(String[] args) throws SQLException {
@@ -51,7 +53,7 @@ public static void main(String[] args) throws SQLException {
 
 		System.out.println("----> Cadastrar tarefa\n");
 		System.out.println("Informe a tarefa: ");
-		String tarefa = leitor.nextLine();
+		String descricao = leitor.nextLine();
 		System.out.println("Informe a prioridade da tarefa: ");
 		int prioridade = leitor.nextInt();
 		
@@ -61,27 +63,34 @@ public static void main(String[] args) throws SQLException {
 		
 		Connection conn = DriverManager.getConnection(dbURL, username, password);
 		
-		if(conn!=null) {
-			String sql = "insert into tarefas (tarefa, prioridade) values (?,?)";
-			PreparedStatement prepStatement = conn.prepareStatement(sql,Statement.RETURN_GENERATED_KEYS);
-			
-			prepStatement.setString(1, tarefa);
-			prepStatement.setInt(2, prioridade);
-			
-			prepStatement.executeUpdate();
-			
-			ResultSet result = prepStatement.getGeneratedKeys();
-			int id=0;
-			
-			if(result.next()){
-				id=result.getInt(1);
+		Tarefa tarefa;
+		try {
+			tarefa = new Tarefa(descricao, prioridade);
+		
+			if(conn!=null) {
+				String sql = "insert into tarefas (tarefa, prioridade) values (?,?)";
+				PreparedStatement prepStatement = conn.prepareStatement(sql,Statement.RETURN_GENERATED_KEYS);
+				
+				prepStatement.setString(1, tarefa.getDescricao());
+				prepStatement.setInt(2, tarefa.getPrioridade());
+				
+				prepStatement.executeUpdate();
+				
+				ResultSet result = prepStatement.getGeneratedKeys();
+				
+				if(result.next()){
+					tarefa.setId(result.getInt(1));
+				}
+				
+				result.close();
+				prepStatement.close();
+				conn.close();
+				
+				System.out.println("\nTarefa salva sob o ID "+tarefa.getId()+"\n");
 			}
-			
-			result.close();
-			prepStatement.close();
-			conn.close();
-			
-			System.out.println("\nTarefa salva sob o ID "+id+"\n");
+		
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 
