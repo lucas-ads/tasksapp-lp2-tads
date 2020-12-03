@@ -6,9 +6,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 import java.util.Scanner;
 
 import br.edu.ifms.tasksapp.dao.ConnectionFactory;
+import br.edu.ifms.tasksapp.dao.TarefaDao;
 import br.edu.ifms.tasksapp.models.Tarefa;
 
 public class Programa { 
@@ -58,36 +60,16 @@ public class Programa {
 		System.out.println("Informe a prioridade da tarefa: ");
 		int prioridade = leitor.nextInt();
 		
-		Connection conn = ConnectionFactory.getConnection();
-		
 		Tarefa tarefa;
 		try {
 			tarefa = new Tarefa(descricao, prioridade);
 		
-			if(conn!=null) {
-				String sql = "insert into tarefas (tarefa, prioridade) values (?,?)";
-				PreparedStatement prepStatement = conn.prepareStatement(sql,Statement.RETURN_GENERATED_KEYS);
-				
-				prepStatement.setString(1, tarefa.getDescricao());
-				prepStatement.setInt(2, tarefa.getPrioridade());
-				
-				prepStatement.executeUpdate();
-				
-				ResultSet result = prepStatement.getGeneratedKeys();
-				
-				if(result.next()){
-					tarefa.setId(result.getInt(1));
-				}
-				
-				result.close();
-				prepStatement.close();
-				conn.close();
-				
-				System.out.println("\nTarefa salva sob o ID "+tarefa.getId()+"\n");
-			}
-		
+			TarefaDao tarefaDao= new TarefaDao();
+			tarefaDao.cadastrar(tarefa);
+			
+			System.out.println("Tarefa cadastrada com sucesso.\n");
 		} catch (Exception e) {
-			e.printStackTrace();
+			System.out.println("Erro ao atualizar tarefa: " + e.getMessage());
 		}
 	}
 
@@ -97,51 +79,30 @@ public class Programa {
 		int id = leitor.nextInt();
 		leitor.nextLine(); //Limpar buffer do console 
 		
-		Connection conn = ConnectionFactory.getConnection();
-		
-		if(conn!=null) {
-		
-			String sql = "select * from tarefas where id = ?";
-			PreparedStatement prepStatement = conn.prepareStatement(sql);
-			prepStatement.setInt(1, id);
+		try {
+			TarefaDao tarefaDao = new TarefaDao();
+			Tarefa tarefa = tarefaDao.buscar(id);
 			
-			ResultSet result = prepStatement.executeQuery();
-			
-			String tarefa="";
-			int prioridade=0;
-			
-			if(result.next()) {
-				tarefa = result.getString("tarefa");
-				prioridade = result.getInt("prioridade");
-				
-				System.out.print("Descrição atual: '"+ tarefa+"'.\nDigite a nova descrição: (Dê enter para manter o atual) ");
+			if(tarefa != null) {
+				System.out.print("Descrição atual: '"+ tarefa.getDescricao() +"'.\nDigite a nova descrição: (Dê enter para manter o atual) ");
 				String tempTarefa = leitor.nextLine();
 				
 				if(!tempTarefa.equals("")) {
-					tarefa = tempTarefa;
+					tarefa.setDescricao(tempTarefa);
 				}
 				
-				System.out.print("\nPrioridade atual: '"+ prioridade+"'.\nDigite a nova prioridade: ");
-				prioridade = leitor.nextInt();
+				System.out.print("\nPrioridade atual: '"+ tarefa.getPrioridade() +"'.\nDigite a nova prioridade: ");
+				tarefa.setPrioridade(leitor.nextInt());
 				leitor.nextLine();//Limpar buffer do console
 				
-				String sqlUpdate = "update tarefas set tarefa=?, prioridade=? where id = ?";
-				
-				prepStatement = conn.prepareStatement(sqlUpdate);
-				prepStatement.setString(1, tarefa);
-				prepStatement.setInt(2, prioridade);
-				prepStatement.setInt(3, id);
-				
-				prepStatement.executeUpdate();
+				tarefaDao.atualizar(tarefa);
 				
 				System.out.println("\nTarefa Atualizada com sucesso.\n");
-				
-				result.close();
-				prepStatement.close();
-				conn.close();
 			}else {
 				System.out.println("\nDesculpe, não existe uma tarefa com o ID informado...\n");
 			}
+		}catch(Exception e) {
+			System.out.println("Erro ao atualizar tarefa: " + e.getMessage());
 		}
 		
 	}
@@ -152,52 +113,40 @@ public class Programa {
 		int id = leitor.nextInt();
 		leitor.nextLine(); //Limpar buffer do console 
 		
-		Connection conn = ConnectionFactory.getConnection();
-		
-		if(conn!=null) {
-			String sql = "delete from tarefas where id = ?";
+		TarefaDao tarefaDao = new TarefaDao();
+		try {
+			tarefaDao.excluir(id);
 			
-			PreparedStatement prepStatement = conn.prepareStatement(sql);
-			prepStatement.setInt(1, id);
-			
-			int linhasAfetadas = prepStatement.executeUpdate();
-			
-			if(linhasAfetadas == 1) {
-				System.out.println("\nTarefa excluída.\n");
-			}else {
-				System.out.println("\nDesculpe, não existe uma tarefa com o ID informado...\n");
-			}
-			
-			prepStatement.close();
-			conn.close();
+			System.out.println("Tarefa excluída com sucesso.\n");
+		}catch(Exception e) {
+			System.out.println("Erro ao excluir tarefa: " + e.getMessage());
 		}
 	}
 
 	public static void listarTarefas() throws SQLException {
 		System.out.println("----> Listar tarefas\n");
 		
-		Connection conn = ConnectionFactory.getConnection();
-		
-		if(conn!=null) {
-			String sql = "select * from tarefas";
+		TarefaDao tarefaDao = new TarefaDao();
+		List<Tarefa> tarefas;
 			
-			PreparedStatement statement = conn.prepareStatement(sql);
+		try {
+			tarefas = tarefaDao.buscarTodas();
 			
-			ResultSet result = statement.executeQuery();
-			
-			System.err.print("ID\t| Prioridade\t| Tarefa\n");
-			
-			while(result.next()) {
-				System.out.print(result.getInt("id"));
-				System.out.print("\t| "+ result.getInt("prioridade"));
-				System.out.println("\t\t| "+ result.getString("tarefa"));
+			if(tarefas != null && tarefas.size()>0) {
+				System.err.print("ID\t| Prioridade\t| Tarefa\n");
+				
+				for(Tarefa tarefa : tarefas) {
+					System.out.print(tarefa.getId());
+					System.out.print("\t| "+ tarefa.getPrioridade());
+					System.out.println("\t\t| "+ tarefa.getDescricao());
+				}
+				
+				System.out.println("\n");
+			}else {
+				System.out.println("Não há tarefas cadastradas.\n");
 			}
-			
-			result.close();
-			statement.close();
-			conn.close();
-			
-			System.out.println("\n");
+		}catch(Exception e) {
+			System.out.println("Erro ao buscar tarefas: " + e.getMessage());
 		}
 	}
 } 
