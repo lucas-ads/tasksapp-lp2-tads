@@ -8,121 +8,131 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import br.edu.ifms.tasksapp.exceptions.TarefaDaoException;
 import br.edu.ifms.tasksapp.models.Tarefa;
 
-public class TarefaDao {
+public class TarefaDao implements ITarefaDao {
 
-	public void cadastrar(Tarefa tarefa) throws Exception {
+	@Override
+	public void cadastrar(Tarefa tarefa) {
 		if (tarefa != null && tarefa.isValid() && tarefa.getId() == 0) {
-			Connection conexao = ConnectionFactory.getConnection();
 
 			String sql = "insert into tarefas (tarefa, prioridade) values (?,?)";
-			PreparedStatement prepStatement = conexao.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 
-			prepStatement.setString(1, tarefa.getDescricao());
-			prepStatement.setInt(2, tarefa.getPrioridade());
+			// try-with-resources
 
-			prepStatement.executeUpdate();
+			try (Connection conexao = ConnectionFactory.getConnection();
+					PreparedStatement prepStatement = conexao.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-			ResultSet result = prepStatement.getGeneratedKeys();
+				prepStatement.setString(1, tarefa.getDescricao());
+				prepStatement.setInt(2, tarefa.getPrioridade());
 
-			if (result.next()) {
-				tarefa.setId(result.getInt(1));
+				prepStatement.executeUpdate();
+
+				try (ResultSet result = prepStatement.getGeneratedKeys()) {
+					if (result.next()) {
+						tarefa.setId(result.getInt(1));
+					}
+				}
+
+			} catch (Exception e) {
+				throw new TarefaDaoException(e.getMessage());
 			}
-
-			result.close();
-			prepStatement.close();
-			conexao.close();
 		}
 	}
 
-	public Tarefa buscar(int id) throws Exception {
+	@Override
+	public Tarefa buscar(int id){
 		if (id > 0) {
-			Connection conexao = ConnectionFactory.getConnection();
-
+			
 			String sql = "select * from tarefas where id = ?";
-			PreparedStatement prepStatement = conexao.prepareStatement(sql);
-			prepStatement.setInt(1, id);
-
-			ResultSet result = prepStatement.executeQuery();
-
-			if (result.next()) {
-				Tarefa tarefa = new Tarefa();
-				tarefa.setId(result.getInt("id"));
-				tarefa.setDescricao(result.getString("tarefa"));
-				tarefa.setPrioridade(result.getInt("prioridade"));
-				return tarefa;
+			
+			try(Connection conexao = ConnectionFactory.getConnection();
+					PreparedStatement prepStatement = conexao.prepareStatement(sql)){
+				prepStatement.setInt(1, id);
+	
+				try(ResultSet result = prepStatement.executeQuery()){
+					if (result.next()) {
+						Tarefa tarefa = new Tarefa();
+						tarefa.setId(result.getInt("id"));
+						tarefa.setDescricao(result.getString("tarefa"));
+						tarefa.setPrioridade(result.getInt("prioridade"));
+						return tarefa;
+					}
+				}
+			}catch(Exception e) {
+				throw new TarefaDaoException(e.getMessage());
 			}
-
-			result.close();
-			prepStatement.close();
-			conexao.close();
+		}else {
+			throw new TarefaDaoException("O ID informado é inválido.");
 		}
 		return null;
 	}
 
-	public List<Tarefa> buscarTodas() throws Exception {
-		Connection conexao = ConnectionFactory.getConnection();
-
+	@Override
+	public List<Tarefa> buscarTodas() {
 		String sql = "select * from tarefas";
-		PreparedStatement prepStatement = conexao.prepareStatement(sql);
 
-		ResultSet result = prepStatement.executeQuery();
-
-		List<Tarefa> tarefas = new ArrayList<Tarefa>();
-
-		while (result.next()) {
-			Tarefa tarefa = new Tarefa();
-			tarefa.setId(result.getInt("id"));
-			tarefa.setDescricao(result.getString("tarefa"));
-			tarefa.setPrioridade(result.getInt("prioridade"));
-			tarefas.add(tarefa);
-		}
-
-		result.close();
-		prepStatement.close();
-		conexao.close();
-
-		return tarefas;
-	}
-
-	public void atualizar(Tarefa tarefa) throws SQLException {
-		if (tarefa != null && tarefa.isValid() && tarefa.getId() > 0) {
-			Connection conexao = ConnectionFactory.getConnection();
-
-			String sqlUpdate = "update tarefas set tarefa=?, prioridade=? where id = ?";
-
-			PreparedStatement prepStatement = conexao.prepareStatement(sqlUpdate);
-
-			prepStatement.setString(1, tarefa.getDescricao());
-			prepStatement.setInt(2, tarefa.getPrioridade());
-			prepStatement.setInt(3, tarefa.getId());
-
-			prepStatement.executeUpdate();
-
-			prepStatement.close();
-			conexao.close();
-		}
-	}
-
-	public void excluir(int id) throws SQLException {
-		if (id > 0) {
-			Connection conexao = ConnectionFactory.getConnection();
-
-			String sql = "delete from tarefas where id = ?";
-
-			PreparedStatement prepStatement = conexao.prepareStatement(sql);
-			prepStatement.setInt(1, id);
+		try(Connection conexao = ConnectionFactory.getConnection();
+				PreparedStatement prepStatement = conexao.prepareStatement(sql);
+				ResultSet result = prepStatement.executeQuery()){
 			
-			prepStatement.executeUpdate();
-			
-			prepStatement.close();
-			conexao.close();
-		}
-	}
+			List<Tarefa> tarefas = new ArrayList<Tarefa>();
 	
-	public void excluir(Tarefa tarefa) throws SQLException {
-		if(tarefa != null && tarefa.getId()>0) {
+			while (result.next()) {
+				Tarefa tarefa = new Tarefa();
+				tarefa.setId(result.getInt("id"));
+				tarefa.setDescricao(result.getString("tarefa"));
+				tarefa.setPrioridade(result.getInt("prioridade"));
+				tarefas.add(tarefa);
+			}
+			return tarefas;
+		}catch(Exception e) {
+			throw new TarefaDaoException(e.getMessage());
+		}
+	}
+
+	@Override
+	public void atualizar(Tarefa tarefa) {
+		if (tarefa != null && tarefa.isValid() && tarefa.getId() > 0) {
+			
+			String sqlUpdate = "update tarefas set tarefa=?, prioridade=? where id = ?";
+			
+			try(Connection conexao = ConnectionFactory.getConnection();
+					PreparedStatement prepStatement = conexao.prepareStatement(sqlUpdate)){
+
+				prepStatement.setString(1, tarefa.getDescricao());
+				prepStatement.setInt(2, tarefa.getPrioridade());
+				prepStatement.setInt(3, tarefa.getId());
+	
+				prepStatement.executeUpdate();
+			}catch(Exception e) {
+				throw new TarefaDaoException(e.getMessage());
+			}
+		}
+	}
+
+	@Override
+	public void excluir(int id){
+		if (id > 0) {
+			String sql = "delete from tarefas where id = ?";
+			
+			try(Connection conexao = ConnectionFactory.getConnection();
+					PreparedStatement prepStatement = conexao.prepareStatement(sql)){
+				prepStatement.setInt(1, id);
+	
+				if(prepStatement.executeUpdate()==0) {
+					throw new TarefaDaoException("O ID informado não corresponde a nenhuma tarefa.");
+				}
+			}catch(Exception e) {
+				throw new TarefaDaoException(e.getMessage());
+			}
+		}
+	}
+
+	@Override
+	public void excluir(Tarefa tarefa) {
+		if (tarefa != null && tarefa.getId() > 0) {
 			this.excluir(tarefa.getId());
 		}
 	}

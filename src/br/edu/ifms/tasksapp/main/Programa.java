@@ -1,21 +1,15 @@
 package br.edu.ifms.tasksapp.main;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.List;
 import java.util.Scanner;
 
-import br.edu.ifms.tasksapp.dao.ConnectionFactory;
+import br.edu.ifms.tasksapp.dao.ITarefaDao;
 import br.edu.ifms.tasksapp.dao.TarefaDao;
 import br.edu.ifms.tasksapp.models.Tarefa;
 
 public class Programa { 
 	
-	public static void main(String[] args) throws SQLException {
+	public static void main(String[] args){
 		
 		int opcao;
 		Scanner leitorTerminal = new Scanner(System.in);
@@ -52,7 +46,7 @@ public class Programa {
 		}while(opcao!=0);
 	}
 	
-	public static void cadastrarTarefa(Scanner leitor) throws SQLException {
+	public static void cadastrarTarefa(Scanner leitor){
 
 		System.out.println("----> Cadastrar tarefa\n");
 		System.out.println("Informe a tarefa: ");
@@ -64,7 +58,7 @@ public class Programa {
 		try {
 			tarefa = new Tarefa(descricao, prioridade);
 		
-			TarefaDao tarefaDao= new TarefaDao();
+			ITarefaDao tarefaDao = new TarefaDao();
 			tarefaDao.cadastrar(tarefa);
 			
 			System.out.println("Tarefa cadastrada com sucesso.\n");
@@ -73,14 +67,14 @@ public class Programa {
 		}
 	}
 
-	public static void editarTarefa(Scanner leitor) throws SQLException {
+	public static void editarTarefa(Scanner leitor) {
 		System.out.println("----> Editar tarefa\n");
 		System.out.println("Informe o ID da tarefa que deseja editar: ");
 		int id = leitor.nextInt();
 		leitor.nextLine(); //Limpar buffer do console 
 		
 		try {
-			TarefaDao tarefaDao = new TarefaDao();
+			ITarefaDao tarefaDao = new TarefaDao();
 			Tarefa tarefa = tarefaDao.buscar(id);
 			
 			if(tarefa != null) {
@@ -107,13 +101,13 @@ public class Programa {
 		
 	}
 
-	public static void excluirTarefa(Scanner leitor) throws SQLException {
+	public static void excluirTarefa(Scanner leitor){
 		System.out.println("----> Excluir tarefa\n");
 		System.out.println("Informe o ID da tarefa que deseja excluir: ");
 		int id = leitor.nextInt();
 		leitor.nextLine(); //Limpar buffer do console 
 		
-		TarefaDao tarefaDao = new TarefaDao();
+		ITarefaDao tarefaDao = new TarefaDao();
 		try {
 			tarefaDao.excluir(id);
 			
@@ -123,10 +117,10 @@ public class Programa {
 		}
 	}
 
-	public static void listarTarefas() throws SQLException {
+	public static void listarTarefas() {
 		System.out.println("----> Listar tarefas\n");
 		
-		TarefaDao tarefaDao = new TarefaDao();
+		ITarefaDao tarefaDao = new TarefaDao();
 		List<Tarefa> tarefas;
 			
 		try {
