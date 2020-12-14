@@ -8,7 +8,7 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane minHeight="400.0" minWidth="700.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="br.edu.ifms.tasksapp.controllers.MainSceneController">
+<BorderPane fx:id="mainSceneRoot" minHeight="400.0" minWidth="700.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="br.edu.ifms.tasksapp.controllers.MainSceneController">
    <top>
       <Label text="Suas Tarefas" BorderPane.alignment="CENTER">
          <font>
@@ -32,7 +32,7 @@
       </TableView>
    </center>
    <bottom>
-      <Button mnemonicParsing="false" text="Nova Tarefa" BorderPane.alignment="CENTER">
+      <Button onAction="#showCadastraTarefa" mnemonicParsing="false" text="Nova Tarefa" BorderPane.alignment="CENTER">
          <font>
             <Font size="14.0" />
          </font>
