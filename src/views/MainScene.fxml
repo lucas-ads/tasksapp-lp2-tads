@@ -6,6 +6,7 @@
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.text.Font?>
 
 <BorderPane fx:id="mainSceneRoot" minHeight="400.0" minWidth="700.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="br.edu.ifms.tasksapp.controllers.MainSceneController">
@@ -32,13 +33,19 @@
       </TableView>
    </center>
    <bottom>
-      <Button onAction="#showCadastraTarefa" mnemonicParsing="false" text="Nova Tarefa" BorderPane.alignment="CENTER">
-         <font>
-            <Font size="14.0" />
-         </font>
-         <BorderPane.margin>
-            <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
-         </BorderPane.margin>
-      </Button>
+      <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+         <children>
+            <Button mnemonicParsing="false" text="Nova Tarefa" onAction="#showCadastraTarefa" />
+            <Button mnemonicParsing="false" text="Editar Tarefa">
+               <opaqueInsets>
+                  <Insets />
+               </opaqueInsets>
+               <HBox.margin>
+                  <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+               </HBox.margin>
+            </Button>
+            <Button mnemonicParsing="false" text="Excluir Tarefa" onAction="#excluirTarefa" />
+         </children>
+      </HBox>
    </bottom>
 </BorderPane>
