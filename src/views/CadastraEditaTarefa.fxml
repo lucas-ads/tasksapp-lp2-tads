@@ -15,9 +15,9 @@
 <?import javafx.scene.text.Text?>
 
 
-<BorderPane fx:id="cadastraTarefaRoot" fx:controller="br.edu.ifms.tasksapp.controllers.CadastraTarefaController" minHeight="400.0" minWidth="700.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/11.0.1">
+<BorderPane fx:id="cadastraTarefaRoot" fx:controller="br.edu.ifms.tasksapp.controllers.CadastraEditaTarefaController" minHeight="400.0" minWidth="700.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/11.0.1">
    <top>
-      <Label text="Cadastrar Tarefa" BorderPane.alignment="CENTER">
+      <Label text="Cadastrar Tarefa" BorderPane.alignment="CENTER" fx:id="titleFormTarefa">
          <font>
             <Font size="20.0" />
          </font>
@@ -29,7 +29,7 @@
    <bottom>
       <HBox alignment="CENTER" prefHeight="70.0" prefWidth="200.0" BorderPane.alignment="CENTER">
          <children>
-            <Button onAction="#cadastrarTarefa" mnemonicParsing="false" text="Cadastrar">
+            <Button onAction="#salvarTarefa" mnemonicParsing="false" text="Cadastrar" fx:id="btnSalvar">
                <font>
                   <Font size="15.0" />
                </font>

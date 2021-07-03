@@ -50,13 +50,39 @@ public class MainSceneController implements Initializable{
 	
 	public void showCadastraTarefa() {
 		try {
-			BorderPane root = new FXMLLoader(getClass().getResource("/views/CadastraTarefa.fxml")).load();
+			BorderPane root = new FXMLLoader(getClass().getResource("/views/CadastraEditaTarefa.fxml")).load();
 			Scene scene = new Scene(root);
 			
 			Stage primaryStage = (Stage) mainSceneRoot.getScene().getWindow();
 			primaryStage.setScene(scene);
 		} catch (IOException e) {
 			e.printStackTrace();
+		}
+	}
+	
+	public void editarTarefa() {
+		Tarefa tarefa = tableTarefas.getSelectionModel().getSelectedItem();
+		Alert alerta;
+		
+		if(tarefa != null) {
+			try {
+				BorderPane root = new FXMLLoader(getClass().getResource("/views/CadastraEditaTarefa.fxml")).load();
+				Scene scene = new Scene(root);
+				
+				Stage primaryStage = (Stage) mainSceneRoot.getScene().getWindow();
+				
+				primaryStage.setUserData(tarefa);
+				
+				primaryStage.setScene(scene);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}else {
+			alerta = new Alert(AlertType.INFORMATION);
+			alerta.setTitle("Atenção");
+			alerta.setHeaderText("Nenhuma tarefa selecionada!");
+			alerta.setContentText("Selecione a tarefa que deseja editar.");
+			alerta.showAndWait();
 		}
 	}
 	
